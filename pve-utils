@@ -20,6 +20,7 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 BLUE='\033[0;36m'
+ORANGE='\033[0;38;5;208m'
 NC='\033[0m' # No Color
 
 # Option Picker
@@ -93,8 +94,21 @@ title() {
   clear
   text="$1"
   echo "---------------------------------------------------------------------"
-  colorecho "$BLUE" "${text}"
+  colorecho "$ORANGE" "${text}"
   echo "---------------------------------------------------------------------"
+}
+
+titleart() {
+  clear
+  colorecho "$ORANGE" "---------------------------------------------------------------------"
+  colorecho "$ORANGE" "______ _   _ _____       _   _ _____ _____ _      _____  "
+  colorecho "$ORANGE" "| ___ \ | | |  ___|     | | | |_   _|_   _| |    /  ___| "
+  colorecho "$ORANGE" "| |_/ / | | | |__ ______| | | | | |   | | | |    \ .--.  "
+  colorecho "$ORANGE" "|  __/| | | |  __|______| | | | | |   | | | |     .--. \ "
+  colorecho "$ORANGE" "| |   \ \_/ / |___      | |_| | | |  _| |_| |____/\__/ / "
+  colorecho "$ORANGE" "\_|    \___/\____/       \___/  \_/  \___/\_____/\____/  "
+  echo
+  colorecho "$ORANGE" "---------------------------------------------------------------------"
 }
 
 ################################################################
@@ -137,77 +151,7 @@ check_internet() {
     fi
 }
 
-add_boot_part_fstab() {
-    title "Updating fstab ..."
-    boot_partition=$(fdisk -l "$rootfs_disk" | grep "$rootfs_disk" | awk 'NR==2{print $1}')
-
-    # Check if the boot_partition is not empty
-    if [ -z "$boot_partition" ]; then
-        echo "Unable to determine boot partition on $rootfs_disk"
-        exit 1
-    fi
-
-    # Add the line to /etc/fstab
-    new_line="$boot_partition /boot vfat dmask=000,fmask=0111,user 0 0"
-
-    # Check if the line already exists in /etc/fstab
-    if grep -qF "/boot vfat dmask=000,fmask=0111,user 0 0" /etc/fstab; then
-        echo "boot partition seems already configured in /etc/fstab to manage by system."
-    else
-        # Add the line to /etc/fstab
-        echo "$new_line" >> /etc/fstab
-        # Check if the addition was successful
-        if [ $? -eq 0 ]; then
-            cat /etc/fstab
-            echo "Line added to /etc/fstab successfully"
-        else
-            echo "Error adding line to /etc/fstab"
-        fi
-    fi
-}
-
-################################################################
-# Initial System Setup
-
-init_setup() {
-
-    title "Welcome to Arch Linux!"
-    colorecho "$GREEN" "Running Initial System Setup ..."
-
-    # Check if the script is being run with root privileges
-    if [[ $EUID -ne 0 ]]; then
-        colorecho "$RED" "Error : Initial System Setup must be run as root"
-        exit 1
-    fi
-
-    # Get rootfs partition from the current mount point "/"
-    rootfs_partition=$(mount | grep "on / " | awk '{print $1}')
-
-    # Get disk path using rootfs partition path
-    rootfs_disk=$(echo "$rootfs_partition" | sed 's/[0-9]*$//')
-    rootfs_disk="${rootfs_disk%p*}"
-
-    if [ ! -e "/boot/extlinux/extlinux.conf" ]; then 
-        add_boot_part_fstab
-    fi
-
-    colorecho "$GREEN" "Resizing File System ..."
-    growpart $rootfs_disk 2
-    resize2fs $rootfs_partition
-
-    # Allow wheel group in sudoers
-    colorecho "$GREEN" "Allowing wheel group in sudoers ..."
-    echo "%wheel ALL=(ALL) ALL" >> /etc/sudoers
-    usermod -aG wheel root
-
-    #Initialize the pacman keyring and populate the Arch Linux ARM package signing keys
-    colorecho "$GREEN" "Setting up pacman ..."
-    pacman-key --init
-    pacman-key --populate archlinuxarm
-
-    colorecho "$GREEN" "Installing sudo ..."
-    pacman -Sy sudo --noconfirm
-
+archived_for_use() {
     # Download and install arch-rock-config
     attempt=0
     until [ -f /usr/bin/arch-rock-config ] || [ "$attempt" -ge 5 ]; do
@@ -222,39 +166,6 @@ init_setup() {
     colorecho "$GREEN" "Adding 7ji archrepo ..."
     arch-rock-config add-7ji
     pacman -Syy
-
-    ################################################################
-    # User Account
-
-    # Prompt user to enter a new username
-    title "Create User Account"
-
-    colorecho "$GREEN" "Removing default account ..."
-    arch-rock-config user remove alarm
-
-    title "Create User Account"
-    read -p "Enter a new username (default=rock): " new_username
-
-    # Check if the username is not empty
-    if [ -z "$new_username" ]; then
-        new_username="rock"
-    fi
-
-    arch-rock-config user add $new_username
-
-    # Prompt user to change the root password
-    title "Root account options"
-    colorecho "$GREEN" "Do you want to keep the root account and change the root password?"
-    options=("Turn off root account (recommended)" "Change root password" "Do not change root password")
-    select_option "${options[@]}"
-    answer=$?
-
-    if [ "$answer" = 1 ]; then
-        colorecho "$GREEN" "Set new root password : "
-        passwd
-    elif [ "$answer" = 0 ]; then
-        passwd -l root
-    fi
 
     if [ -e "/etc/systemd/system/init-setup.service" ]; then 
         systemctl disable init-setup.service
@@ -287,31 +198,28 @@ elif [ "$1" = "--create-init-setup-service" ]; then
 fi
 
 ################################################################
-# Installer Setup
+# Main
 
-title "Welcome to Arch Linux!"
+titleart
 
 # Check internet connection
 check_internet
 
-# Run init setup if not yet done
-if [ ! -e "/usr/bin/arch-rock-config" ]; then 
-    if [ ! "$1" = "--skip-init-setup" ]; then
-        init_setup
-    fi
-fi
-
 # Check if the script is being run with root privileges
 if [[ $EUID -ne 0 ]]; then
-    title "Arch Rock Installer"
-    colorecho "$GREEN" "Starting Setup ..."
-else
-    colorecho "$RED" "Error : Installer must be run as user"
+    colorecho "$RED" "Error : This script must run as root"
     exit 1
 fi
 
+colorecho "$ORANGE" "Kernel: $(uname -sr)"
+colorecho "$ORANGE" "Arch: $(uname -m)"
+colorecho "$ORANGE" "vCPU (Threads): $(nproc)"
+colorecho "$ORANGE" "System Memory: $(free -h | grep "Mem:" | awk '{print $2}')"
+colorecho "$ORANGE" "System Swap: $(free -h | grep "Swap:" | awk '{print $2}')"
+
+exit 1
 ################################################################
-# Time Zone
+# JUST FOR COPY AND PASTE IN CASE THESE ARE USEFUL
 
 title "Arch Rock Installer - Language"
 
