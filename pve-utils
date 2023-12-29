@@ -117,6 +117,7 @@ internet_retry_count=0
 
 check_internet() {
     colorecho "$YELLOW" "Checking internet connection..."
+    titleart
     servers=("google.com" "1.1.1.1" "114.114.114.114") # ping Google, Cloudflare and China Mobile DNS (for China users)
     internet_available=false
 
@@ -216,7 +217,29 @@ colorecho "$ORANGE" "Arch: $(uname -m)"
 colorecho "$ORANGE" "vCPU (Threads): $(nproc)"
 colorecho "$ORANGE" "System Memory: $(free -h | grep "Mem:" | awk '{print $2}')"
 colorecho "$ORANGE" "System Swap: $(free -h | grep "Swap:" | awk '{print $2}')"
+colorecho "$ORANGE" "---------------------------------------------------------------------"
+colorecho "$ORANGE" "Select an option:"
 
+options=("1. Proxmox VE Post Install")
+options+=("2. Setup GPU Passthrough")
+options+=("3. Setup GPU Passthrough")
+options+=("4. Setup Docker LXC (and Portainer)")
+options+=("5. Create New Linux (LXC)")
+options+=("6. Create New Linux (VM)")
+options+=("7. Create New Windows (VM)")
+options+=("8. Create New macOS (VM)")
+options+=("9. Setup Home Assistant (LXC or VM)")
+options+=("10. Setup Cloudflared (LXC)")
+options+=("11. Setup Wireguard (LXC)")
+options+=("12. Setup OpenWRT (VM)")
+options+=("13. Setup DSM (VM)")
+
+options+=("Exit PVE Utility (pve-utils)")
+
+select_option "${options[@]}"
+de_options=$?
+
+echo "Coming Soon"
 exit 1
 ################################################################
 # JUST FOR COPY AND PASTE IN CASE THESE ARE USEFUL
