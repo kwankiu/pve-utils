@@ -186,11 +186,11 @@ archived_for_use() {
 # About this Installer
 
 if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
-    colorecho "$BLUE" "Proxmox VE Utilities"
+    colorecho "$ORANGE" "Proxmox VE Utilities"
     echo "Usage: pve-utils <optional_argument>"
 
     colorecho "$GREEN" "Options"
-    echo "-h / --help : Usage and Infomation of this installer"
+    echo "-h / --help : Usage and Infomation of this utility"
     exit 1
 elif [ "$1" = "--create-init-setup-service" ]; then
     #echo -e "[Unit]\nDescription=Initial System Setup\nAfter=network.target\nBefore=sshd.service systemd-logind.service getty@tty1.service\n\n[Service]\nType=oneshot\nTTYPath=/dev/tty13\nExecStartPre=/usr/bin/chvt 13\nExecStart=/usr/bin/installer\nExecStartPost=/usr/bin/chvt 1\nTimeoutStartSec=0\nStandardInput=tty\nTTYVHangup=yes\nTTYVTDisallocate=yes\n\n[Install]\nWantedBy=default.target\nRequiredBy=sshd.service systemd-logind.service getty@tty1.service" | tee /etc/systemd/system/init-setup.service && systemctl enable init-setup.service
