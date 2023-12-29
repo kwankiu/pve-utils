@@ -239,9 +239,11 @@ select_option "${options[@]}"
 de_options=$?
 
 echo "Coming Soon"
+################################################################
+# END OF THIS SCRIPT
 exit 1
 ################################################################
-# JUST FOR COPY AND PASTE IN CASE THESE ARE USEFUL
+# JUST SOME CODE FOR COPY AND PASTE IN CASE THESE ARE USEFUL
 
 title "Arch Rock Installer - Language"
 
