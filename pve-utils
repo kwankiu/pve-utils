@@ -227,18 +227,94 @@ options+=("5. Create New Linux (LXC)")
 options+=("6. Create New Linux (VM)")
 options+=("7. Create New Windows (VM)")
 options+=("8. Create New macOS (VM)")
-options+=("9. Setup Home Assistant (LXC or VM)")
-options+=("10. Setup Cloudflared (LXC)")
-options+=("11. Setup Wireguard (LXC)")
-options+=("12. Setup OpenWRT (VM)")
-options+=("13. Setup DSM (VM)")
+options+=("9. Setup Home Assistant OS (VM)")
+options+=("10. Setup Home Assistant Core (LXC)")
+options+=("11. Setup Cloudflared (LXC)")
+options+=("12. Setup Wireguard (LXC)")
+options+=("13. Setup OpenWRT (VM)")
+options+=("14. Setup DSM (Xpenology VM)")
 
 options+=("Exit PVE Utility (pve-utils)")
 
 select_option "${options[@]}"
 de_options=$?
 
-echo "Coming Soon"
+case $de_options in
+                0)
+                    colorecho "$ORANGE" "Script provided by Helper-Scripts.com (https://github.com/tteck/Proxmox)"
+                    colorecho "$GREEN" "Running Post Install Script ..."
+                    bash -c "$(wget -qLO - https://github.com/tteck/Proxmox/raw/main/misc/post-pve-install.sh)"
+                    ;;
+                1)
+                    colorecho "$GREEN" "Running Setup GPU Passthrough ..."
+                    echo "Coming Soon 2"
+                    ;;
+                2)
+                    colorecho "$GREEN" "Running Setup GPU Passthrough ..."
+                    echo "Coming Soon 3"
+                    ;;
+                3)
+                    colorecho "$ORANGE" "Script provided by Helper-Scripts.com (https://github.com/tteck/Proxmox)"
+                    colorecho "$GREEN" "Running Docker LXC Script (Alpine Linux LXC + Docker + Optional Portainer + Optional Compose) ..."
+                    bash -c "$(wget -qO - https://github.com/tteck/Proxmox/raw/main/ct/alpine-docker.sh)"
+                    ;;
+                6)
+                    colorecho "$ORANGE" "Setup Windows VM"
+                    colorecho "$ORANGE" "Coming Soon"
+                    # ISO : Windows 10, 11, Tiny10, Tiny11
+                    # Enable GPU Passthrough?
+                    # Download Virtio?
+                    # Disk : VFIO, Virtio-blk, Emulated NVMe, SATA
+                    # CPU Cores
+                    # Memory (if pci used then disable balloon)
+                    # SMBIOS and UUID (use host SMBIOS and UUID to keep Windows Activation)
+                    # Auto Start
+
+                    colorecho "$GREEN" ""
+                    ;;
+                7)
+                    colorecho "$ORANGE" "Setup macOS VM"
+                    colorecho "$ORANGE" "Coming Soon"
+                    colorecho "$GREEN" ""
+                    ;;
+                8)
+                    colorecho "$ORANGE" "Setup Home Assistant OS"
+                    colorecho "$ORANGE" "Script provided by Helper-Scripts.com (https://github.com/tteck/Proxmox)"
+                    colorecho "$GREEN" "Running Home Assistant OS VM Script ..."
+                    bash -c "$(wget -qLO - https://github.com/tteck/Proxmox/raw/main/vm/haos-vm.sh)"
+                    ;;
+                9)
+                    colorecho "$ORANGE" "Setup Home Assistant Core"
+                    colorecho "$ORANGE" "Script provided by Helper-Scripts.com (https://github.com/tteck/Proxmox)"
+                    colorecho "$GREEN" "Running Home Assistant Core LXC Script ..."
+                    bash -c "$(wget -qLO - https://github.com/tteck/Proxmox/raw/main/ct/homeassistant-core.sh)"
+                    ;;
+                10)
+                    colorecho "$ORANGE" "Script provided by Helper-Scripts.com (https://github.com/tteck/Proxmox)"
+                    colorecho "$GREEN" "Running Cloudflared LXC Script ..."
+                    bash -c "$(wget -qLO - https://github.com/tteck/Proxmox/raw/main/ct/cloudflared.sh)"
+                    ;;
+                11)
+                    colorecho "$ORANGE" "Script provided by Helper-Scripts.com (https://github.com/tteck/Proxmox)"
+                    colorecho "$GREEN" "Running Wireguard LXC Script ..."
+                    bash -c "$(wget -qLO - https://github.com/tteck/Proxmox/raw/main/ct/wireguard.sh)"
+                    ;;
+                12)
+                    colorecho "$ORANGE" "Script provided by Helper-Scripts.com (https://github.com/tteck/Proxmox)"
+                    colorecho "$GREEN" "Running OpenWRT LXC Script ..."
+                    bash -c "$(wget -qLO - https://github.com/tteck/Proxmox/raw/main/vm/openwrt.sh)"
+                    ;;
+                13)
+                    colorecho "$ORANGE" "Setup Xpenology DSM"
+                    colorecho "$ORANGE" "Coming Soon"
+                    #Select DSM Model
+                    ;;
+                *)
+                    colorecho "$ORANGE" "Coming Soon"
+                    exit 1
+                    ;;
+esac
+
 ################################################################
 # END OF THIS SCRIPT
 exit 1
