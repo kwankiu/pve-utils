@@ -227,6 +227,20 @@ colorecho "$ORANGE" "vCPU (Threads): $vcpu"
 colorecho "$ORANGE" "System Memory: $memfree GB free / $memtotal GB total ($(awk "BEGIN{printf \"%.2f%%\\n\", (1-(${memfree}/${memtotal}))*100}") used)"
 colorecho "$ORANGE" "System Swap: $swapfree GB free / $swaptotal GB total ($(awk "BEGIN{printf \"%.2f%%\\n\", (1-(${swapfree}/${swaptotal}))*100}") used)"
 colorecho "$ORANGE" "---------------------------------------------------------------------"
+
+colorecho "$ORANGE" "Quick Start:"
+
+options=("1. Setup as HomeLab (NAS/Server)")
+options+=("2. Setup as HomeLab (Gaming+Media)")
+options+=("3. Post Install Only")
+
+select_option "${options[@]}"
+de_options=$?
+
+main_menu
+
+################################################################
+main_menu() {
 colorecho "$ORANGE" "Select an option:"
 
 options=("1. Proxmox VE Post Install")
@@ -324,7 +338,7 @@ case $de_options in
                     exit 1
                     ;;
 esac
-
+}
 ################################################################
 # END OF THIS SCRIPT
 exit 1
