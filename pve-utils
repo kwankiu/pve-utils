@@ -214,8 +214,8 @@ fi
 colorecho "$ORANGE" "Kernel: $(uname -sr)"
 colorecho "$ORANGE" "Arch: $(uname -m)"
 colorecho "$ORANGE" "vCPU (Threads): $(nproc)"
-colorecho "$ORANGE" "System Memory: $(free -h | grep "Mem:" | awk '{print $2}')"
-colorecho "$ORANGE" "System Swap: $(free -h | grep "Swap:" | awk '{print $2}')"
+colorecho "$ORANGE" "System Memory: $(free -h | grep "Mem:" | awk '{print $4 " free / " $2 " total (" (100-(($4/$2)*100))  "% used)"}' | sed 's\Gi\GiB\g') "
+colorecho "$ORANGE" "System Swap: $(free -h | grep "Swap:" | awk '{print $4 " free / " $2 " total (" (100-(($4/$2)*100))  "% used)"}' | sed 's\Gi\GiB\g')"
 colorecho "$ORANGE" "---------------------------------------------------------------------"
 colorecho "$ORANGE" "Select an option:"
 
