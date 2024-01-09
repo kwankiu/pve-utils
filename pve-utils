@@ -224,7 +224,7 @@ colorecho "$YELLOW" "WARNING: This utility is currently under heavy development,
 colorecho "$ORANGE" "Kernel: $kernel"
 colorecho "$ORANGE" "Arch: $arch"
 colorecho "$ORANGE" "vCPU (Threads): $vcpu"
-colorecho "$ORANGE" "System Memory: $memfree GB free / $memtotal GB total ($(echo "scale=2; 100-($memfree/$memtotal)*100" | bc)% used)"
+colorecho "$ORANGE" "System Memory: $memfree GB free / $memtotal GB total ($(((100 * (memtotal - memfree)) / memtotal )))% used)"
 colorecho "$ORANGE" "System Swap: $swapfree GB free / $swaptotal GB total ($(echo "scale=2; 100-($swapfree/$swaptotal)*100" | bc)% used)"
 colorecho "$ORANGE" "---------------------------------------------------------------------"
 colorecho "$ORANGE" "Select an option:"
