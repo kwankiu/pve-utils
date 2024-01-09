@@ -12,6 +12,15 @@
 branch=main
 ################################################################
 # Define variables
+
+kernel=$(uname -sr)
+arch=$(uname -m)
+vcpu=$(nproc)
+memfree=$(free -h | grep "Mem:" | awk '{print $4}' | sed 's\Gi\\g')
+swapfree=$(free -h | grep "Swap:" | awk '{print $4}' | sed 's\Gi\\g')
+memtotal=$(free -h | grep "Mem:" | awk '{print $2}' | sed 's\Gi\\g')
+swaptotal=$(free -h | grep "Swap:" | awk '{print $2}' | sed 's\Gi\\g')
+
 ################################################################
 # Tools for formatting / styling
 
@@ -211,10 +220,11 @@ if [[ $EUID -ne 0 ]]; then
     exit 1
 fi
 
-colorecho "$ORANGE" "Kernel: $(uname -sr)"
-colorecho "$ORANGE" "Arch: $(uname -m)"
-colorecho "$ORANGE" "vCPU (Threads): $(nproc)"
-colorecho "$ORANGE" "System Memory: $(free -h | grep "Mem:" | awk '{print $4 " free / " $2 " total (" (100-(($4/$2)*100))  "% used)"}' | sed 's\Gi\GiB\g') "
+colorecho "$YELLOW" "WARNING: This utility is currently under heavy development, most of the feature may not be available."
+colorecho "$ORANGE" "Kernel: $kernel"
+colorecho "$ORANGE" "Arch: $arch"
+colorecho "$ORANGE" "vCPU (Threads): $vcpu"
+colorecho "$ORANGE" "System Memory: $memfree free / $memtotal total ($((100 - (memfree * 100 / memtotal))) % used)"
 colorecho "$ORANGE" "System Swap: $(free -h | grep "Swap:" | awk '{print $4 " free / " $2 " total (" (100-(($4/$2)*100))  "% used)"}' | sed 's\Gi\GiB\g')"
 colorecho "$ORANGE" "---------------------------------------------------------------------"
 colorecho "$ORANGE" "Select an option:"
