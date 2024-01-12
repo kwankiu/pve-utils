@@ -10,6 +10,8 @@
 
 # Quick Start Setup
 
+### Quick Start Setup MUST be done on a clean install of Proxmox, using it on a non-clean system may break your system.
+
 ## 1. Setup as a Server / NAS
 
 ### Here are some examples on what you can run:
