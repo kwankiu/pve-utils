@@ -55,7 +55,9 @@ bash <(curl -fsSL https://raw.githubusercontent.com/kwankiu/pve-utils/main/pve-u
 ```
 # Installation
 
-To install this utility to PATH (/usr/bin) so you dont need to curl the utility from the web everytime, you can run :
+The Proxmox Helper Utility (pve-utils) should be already installed automatically if you setup your Proxmox VE from any Quick Start Setup options above.
+
+If you want to use this utility without using Quick Start Setup, it can be installed by running :
 
 ```
 bash <(curl -fsSL https://raw.githubusercontent.com/kwankiu/pve-utils/main/pve-utils) --install
