@@ -205,7 +205,7 @@ colorecho "$ORANGE" "Quick Start (ONLY DO THIS IN A FRESH INSTALL):"
 
 options=("1. Setup as Server / NAS")
 options+=("2. Setup as Gaming / Media HomeLab")
-options+=("3. Run Post Install Only")
+options+=("3. Run Post Install Setup Only")
 options+=("Exit PVE Utility (pve-utils)")
 
 select_option "${options[@]}"
