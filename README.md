@@ -10,9 +10,14 @@
 
 # Quick Start Setup
 
-### Quick Start Setup MUST be done on a clean install of Proxmox, using it on a non-clean system may break your system.
+### ⚠️ Quick Start Setup MUST be done on a clean install of Proxmox, using it on a non-clean system may break your system.
 
 ## 1. Setup as a Server / NAS
+
+Run the following command in your Proxmox VE host shell (terminal or SSH):
+```
+bash <(curl -fsSL https://raw.githubusercontent.com/kwankiu/pve-utils/main/pve-utils) --quickstartserver
+```
 
 ### Here are some examples on what you can run:
 - Smart Home : [Home Assistant](https://www.home-assistant.io/)
@@ -25,6 +30,11 @@
 
 ## 2. Setup as a Gaming / Media HomeLab
 
+Run the following command in your Proxmox VE host shell (terminal or SSH):
+```
+bash <(curl -fsSL https://raw.githubusercontent.com/kwankiu/pve-utils/main/pve-utils) --quickstartgaming
+```
+
 ### Here are some examples on what you can run:
  - ***Everything from above (1. Setup as a Server / NAS) and***
  - Windows 10/11 Gaming VM
@@ -35,6 +45,14 @@
  
 ⚠️ To be written
 
+## 3. Run Post Install Setup Only
+
+#### This option is currently identical to running the Proxmox VE Post Install from https://tteck.github.io/Proxmox/.
+
+Run the following command in your Proxmox VE host shell (terminal or SSH):
+```
+bash <(curl -fsSL https://raw.githubusercontent.com/kwankiu/pve-utils/main/pve-utils) --postinstallonly
+```
 # Installation
 
 To install this utility to PATH (/usr/bin) so you dont need to curl the utility from the web everytime, you can run :
