@@ -161,48 +161,21 @@ check_internet() {
     fi
 }
 
-archived_for_use() {
-    # Download and install arch-rock-config
-    attempt=0
-    until [ -f /usr/bin/arch-rock-config ] || [ "$attempt" -ge 5 ]; do
-        colorecho "$GREEN" "Installing Configuration Utility (arch-rock-config) ..."
-        sleep 3
-        cd /usr/bin
-        curl -LJO https://raw.githubusercontent.com/kwankiu/archlinux-installer-rock5/$branch/tools/arch-rock-config
-        ((attempt++))
-    done
-    chmod +x arch-rock-config
-
-    colorecho "$GREEN" "Adding 7ji archrepo ..."
-    arch-rock-config add-7ji
-    pacman -Syy
-
-    if [ -e "/etc/systemd/system/init-setup.service" ]; then 
-        systemctl disable init-setup.service
-        rm -rf /etc/systemd/system/init-setup.service
-    fi
-
-    mkdir -p /etc/systemd/system/getty@tty1.service.d
-    echo -e "[Service]\nExecStart=\nExecStart=-/sbin/agetty -o '-p -f -- \\u' --noclear --autologin $new_username %I \$TERM" | tee /etc/systemd/system/getty@tty1.service.d/autologin.conf
-    echo "installer" | tee -a /home/$new_username/.bashrc
-
-    colorecho "$GREEN" "Rebooting..."
-    systemctl reboot
-    reboot
-}
-
 ################################################################
-# About this Installer
+# About this Utility
 
 if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
-    colorecho "$ORANGE" "Proxmox VE Utilities"
-    echo "Usage: pve-utils <optional_argument>"
+    colorecho "$ORANGE" "Proxmox VE Helper Utility"
+    echo "Usage: pve-utils <options> --ARGUMENTS=<value> or -FLAGS"
 
     colorecho "$GREEN" "Options"
-    echo "-h / --help : Usage and Infomation of this utility"
-    exit 1
-elif [ "$1" = "--create-init-setup-service" ]; then
-    #echo -e "[Unit]\nDescription=Initial System Setup\nAfter=network.target\nBefore=sshd.service systemd-logind.service getty@tty1.service\n\n[Service]\nType=oneshot\nTTYPath=/dev/tty13\nExecStartPre=/usr/bin/chvt 13\nExecStart=/usr/bin/installer\nExecStartPost=/usr/bin/chvt 1\nTimeoutStartSec=0\nStandardInput=tty\nTTYVHangup=yes\nTTYVTDisallocate=yes\n\n[Install]\nWantedBy=default.target\nRequiredBy=sshd.service systemd-logind.service getty@tty1.service" | tee /etc/systemd/system/init-setup.service && systemctl enable init-setup.service
+    echo "-h / --help : Usage and Infomation of this Utility."
+    echo "-d / --dev : Use latest dev version of this Utility."
+    echo "-i / --install <channel> : Install latest utility to PATH (/usr/bin). install channel options: main, dev."
+
+    colorecho "$GREEN" "Create VM / LXC"
+    echo "create : Show create VM/LXC utility menu."
+    echo "To be updated."
     exit 1
 fi
 
@@ -228,18 +201,45 @@ colorecho "$ORANGE" "System Memory: $memfree GB free / $memtotal GB total ($(awk
 colorecho "$ORANGE" "System Swap: $swapfree GB free / $swaptotal GB total ($(awk "BEGIN{printf \"%.2f%%\\n\", (1-(${swapfree}/${swaptotal}))*100}") used)"
 colorecho "$ORANGE" "---------------------------------------------------------------------"
 
-colorecho "$ORANGE" "Quick Start:"
+colorecho "$ORANGE" "Quick Start (ONLY DO THIS IN A FRESH INSTALL):"
 
-options=("1. Setup as HomeLab (NAS/Server)")
-options+=("2. Setup as HomeLab (Gaming+Media)")
-options+=("3. Post Install Only")
+options=("1. Setup as Server / NAS")
+options+=("2. Setup as Gaming / Media HomeLab")
+options+=("3. Run Post Install Only")
+options+=("Exit PVE Utility (pve-utils)")
 
 select_option "${options[@]}"
 de_options=$?
 
-main_menu
+case $de_options in
+                0)
+                    colorecho "$GREEN" "Setting up as Server / NAS ..."
+                    echo "Coming Soon"
+                    ;;
+                1)
+                    colorecho "$GREEN" "Setting up as Gaming / Media HomeLab ..."
+                    echo "Coming Soon"
+                    ;;
+                2)
+                    colorecho "$GREEN" "Running Post Install Script ..."
+                    colorecho "$ORANGE" "Script provided by Helper-Scripts.com (https://github.com/tteck/Proxmox)"
+                    bash -c "$(wget -qLO - https://github.com/tteck/Proxmox/raw/main/misc/post-pve-install.sh)"
+                    ;;
+                3)
+                    colorecho "$ORANGE" "Exiting PVE Utility ..."
+                    exit 1
+                    ;;
+                *)
+                    colorecho "$RED" "UNKNOWN ERROR"
+                    exit 1
+                    ;;
+esac
 
 ################################################################
+# KILL THIS SCRIPT IF ENDED
+exit 1
+################################################################
+
 main_menu() {
 colorecho "$ORANGE" "Select an option:"
 
@@ -339,307 +339,5 @@ case $de_options in
                     ;;
 esac
 }
-################################################################
-# END OF THIS SCRIPT
-exit 1
-################################################################
-# JUST SOME CODE FOR COPY AND PASTE IN CASE THESE ARE USEFUL
-
-title "Arch Rock Installer - Language"
-
-    lclist=$(arch-rock-config locale list-available)
-    netlang=$(curl -s https://ipapi.co/languages)
-    network_lang=()
-    IFS=',' read -ra network_lang <<< "$netlang"
-    colorecho "$GREEN" "Let's begin with setting up your language, is that right?"
-    colorecho "$GREEN" "Suggested Languages are:"
-    echo
-    options=()
-    for ((i = 0; i < ${#network_lang[@]}-1; i++)); do
-        options+=("${network_lang[$i]}")
-    done
-    sgdindx=$i
-    options+=("More Languages" "Skip setting Language")
-    select_option "${options[@]}"
-    choice=$?
-
-    if [ "$choice" = "$sgdindx" ]; then
-        title "Arch Rock Installer - Language (More Options)"
-        select_option "${langopt[@]}"
-        choice=$?
-        if [ "$choice" = 0 ]; then
-            langchoice=("${langchi[@]}") # Chinese
-        elif [ "$choice" = 1 ]; then
-            langchoice=("${langeng[@]}") # English
-        elif [ "$choice" = 2 ]; then
-            langchoice=("${langspa[@]}") # Spanish
-        elif [ "$choice" = 3 ]; then
-            langchoice=("${langfre[@]}") # French
-        elif [ "$choice" = 4 ]; then
-            langchoice=("${langger[@]}") # German
-        elif [ "$choice" = 5 ]; then
-            langchoice=("${langara[@]}") # Arabic
-        else
-            title "Arch Rock Installer - Language (Others - sort by continents)"
-            select_option "${langcon[@]}"
-            choice=$?
-            if [ "$choice" = 0 ]; then
-                langchoice=("${langconas[@]}") # Asia
-            elif [ "$choice" = 1 ]; then
-                langchoice=("${langconeu[@]}") # Europe
-            elif [ "$choice" = 2 ]; then
-                langchoice=("${langconam[@]}") # Americas
-            elif [ "$choice" = 3 ]; then
-                langchoice=("${langconaf[@]}") # Africa
-            elif [ "$choice" = 4 ]; then
-                langchoice=("${langconother[@]}") # Others
-            fi
-        fi
-        title "Arch Rock Installer - Language (More Options)"
-        select_option "${langchoice[@]}"
-        choice=$?
-        echo "Set Language to ${langchoice[$choice]%% (*}"
-        arch-rock-config locale generate ${langchoice[$choice]%% (*} -y
-    elif [ "$choice" -ge "$sgdindx" ]; then
-        echo "Skipping ..."
-    else
-        echo "Set Language to ${options[$choice]}"
-        arch-rock-config locale generate ${options[$choice]} -y
-    fi
-
-################################################################
-# Time Zone
-
-title "Arch Rock Installer - Time Zone"
-
-    ntz=$(arch-rock-config time network-time-zone)
-    colorecho "$GREEN" "Your time zone is: $ntz"
-    colorecho "$GREEN" "Is that correct?"
-    echo
-
-    options=("Yes, this is correct" "No, let me correct my Time Zone" "Skip setting Time Zone")
-    select_option "${options[@]}"
-    choice=$?
-
-    if [ "$choice" = 0 ]; then
-        arch-rock-config "time" set-time-zone sync
-    elif [ "$choice" = 1 ]; then
-        arch-rock-config "time" set-time-zone
-    fi
-
-################################################################
-# Select desktop environment
-
-title "Arch Rock Installer - Desktop Environment"
-colorecho "$GREEN" "Select a desktop environment to install :"
-echo
-
-options=("Gnome" "KDE Plasma" "Budgie" "Sway" "Cutefish" "Deepin" "XFCE" "LXQt" "LXDE" "MATE" "Cinnamon")
-options+=("Skip")
-
-select_option "${options[@]}"
-de_options=$?
-
-################################################################
-# Install Linux Kernel
-
-title "Arch Rock Installer - Installing Linux Kernel"
-
-    oldkrlrel=$(uname -r)
-    kernelpkg="linux-radxa-rkbsp5-git"
-    yes y|sudo pacman -S --overwrite \* $kernelpkg $kernelpkg-headers
-
-    if sudo pacman -Qs $kernelpkg > /dev/null ; then
-        colorecho "$GREEN" "Removing Old Kernel Modules ..."
-        sudo rm -rf /boot/dtbs/$oldkrlrel /lib/modules/$oldkrlrel
-    else
-        sudo pacman -S --overwrite \* $kernelpkg $kernelpkg-headers
-        if sudo pacman -Qs $kernelpkg > /dev/null ; then
-            colorecho "$GREEN" "Removing Old Kernel Modules ..."
-            sudo rm -rf /boot/dtbs/$oldkrlrel /lib/modules/$oldkrlrel
-        else
-            colorecho "$RED" "Error: Failed to Install Linux Kernel"
-            colorecho "$RED" "Installation can not be continued, exiting ..."
-            exit 1
-        fi
-    fi
-
-    colorecho "$GREEN" "Installing DKMS Packages ..."
-    arch-rock-config install "r8125-dkms-git" "8852bu-dkms-git" "8852be-dkms-git" 
-
-    colorecho "$YELLOW" "Updating extlinux.conf ..."
-    # apply new extlinux.conf
-    sudo mv /boot/extlinux/extlinux.arch.template /boot/extlinux/extlinux.conf
-
-    # Get rootfs partition from the current mount point "/"
-    rootfs_partition=$(mount | grep "on / " | awk '{print $1}')
-
-    # Find the UUIDs of the root partition
-    root_uuid=$(sudo blkid $rootfs_partition | awk '{print $2}' | tr -d '"')
-    echo "Root partition UUID: $root_uuid"
-
-    # Change UUID for extlinux.conf
-    colorecho "$GREEN" "Updating UUID for extlinux.conf ..."
-    
-    sudo sed -i "s|UUID=\\*\\*CHANGEME\\*\\*|$root_uuid|" /boot/extlinux/extlinux.conf
-    sudo sed -i "s|UUID=CHANGEME|$root_uuid|" /boot/extlinux/extlinux.conf
-
-    if grep -qF "/boot vfat dmask=000,fmask=0111,user 0 0" /etc/fstab; then
-        echo "Done"
-    else
-        colorecho "$GREEN" "Updating paths for extlinux.conf ..."
-        sudo sed -i "s| /vmlinuz| /boot/vmlinuz|" /boot/extlinux/extlinux.conf
-        sudo sed -i "s| /initramfs| /boot/initramfs|" /boot/extlinux/extlinux.conf
-        sudo sed -i "s| /initrd| /boot/initrd|" /boot/extlinux/extlinux.conf
-        sudo sed -i "s| /dtbs| /boot/dtbs|" /boot/extlinux/extlinux.conf
-        sudo sed -i "s| /dtbo| /boot/dtbo|" /boot/extlinux/extlinux.conf
-    fi
-
-################################################################
-# Install Mesa and GPU drivers
-
-title "Arch Rock Installer - Installing Mesa and GPU drivers"
-
-    sudo pacman -S mesa-panfork-git --noconfirm
-
-################################################################
-# Install Video Acceleration
-
-title "Arch Rock Installer - Installing Video Acceleration"
-
-    sudo pacman -S mpp-git ffmpeg4.4-mpp ffmpeg-mpp --noconfirm
-
-################################################################
-# Post Installation
-
-title "Arch Rock Installer - Post Installation"
-
-colorecho "$GREEN" "Performing Full System Upgrade ..."
-sudo pacman -Syyu --noconfirm
-
-# The fix for some Bluetooth Modules (A8, AX210, etc.)
-colorecho "$GREEN" "Applying Bluetooth Fix ..."
-echo -e "blacklist pgdrv\nblacklist btusb\nblacklist btrtl\nblacklist btbcm\n#blacklist btintel" | sudo tee -a /etc/modprobe.d/blacklist.conf
-
-# Network Manager, WiFi, Bluetooth
-colorecho "$GREEN" "Installing network manager and bluetooth ..."
-sudo pacman -S networkmanager iw bluez --noconfirm
-
-colorecho "$GREEN" "Enabling network manager and bluetooth service ..."
-sudo systemctl enable NetworkManager.service
-sudo systemctl start NetworkManager.service
-sudo systemctl enable bluetooth.service
-sudo systemctl start bluetooth.service
-
-################################################################
-# Install desktop environment
-
-title "Arch Rock Installer - Install desktop environment"
-
-# Install desktop environment
-if [ "$de_options" = 0 ]; then
-    # Install Gnome
-    colorecho "$GREEN" "Installing Gnome ..."
-    sudo pacman -S gnome --noconfirm
-    #GDM_CONFIG_FILE="/etc/gdm/custom.conf"
-    #if [ -f "$GDM_CONFIG_FILE" ]; then
-        #sudo sed -i 's/^#WaylandEnable/WaylandEnable=false/' "$GDM_CONFIG_FILE"
-        #echo "Wayland has been disabled for GDM."
-    #else
-        #echo "GDM configuration file ($GDM_CONFIG_FILE) not found."
-    #fi
-    sudo systemctl enable gdm
-elif [ "$de_options" = 1 ]; then
-    # Install KDE Plasma
-    colorecho "$GREEN" "Installing KDE Plasma ..."
-    sudo pacman -S plasma-desktop sddm --noconfirm
-    sudo systemctl enable sddm
-elif [ "$de_options" = 2 ]; then
-    # Install Budgie
-    colorecho "$GREEN" "Installing Budgie ..."
-    sudo pacman -S budgie-desktop gdm gnome-keyring gnome-control-center gnome-terminal gnome-tweak-tool nautilus --noconfirm
-    sudo systemctl enable gdm
-elif [ "$de_options" = 3 ]; then
-    # Install Sway
-    colorecho "$GREEN" "Installing Sway ..."
-    sudo pacman -S sway wofi lxappearance qt5ct python-pywal waybar pcmanfm-qt pass dunst swayidle swaylock swaybg xorg-xwayland qt5-wayland foot sddm --noconfirm
-    sudo systemctl enable sddm
-    sudo mkdir -p .config/{sway,dunst,waybar,wofi}
-    sudo install -Dm755 /etc/sway/config ~/.config/sway/config
-    sudo install -Dm755 /etc/dunst/dunstrc ~/.config/dunst/dunstrc
-    sudo touch ~/.config/waybar/config
-    sudo touch ~/.config/wofi/config
-elif [ "$de_options" = 4 ]; then
-    # Install Cutefish
-    colorecho "$GREEN" "Installing Cutefish ..."
-    sudo pacman -S cutefish sddm --noconfirm
-    sudo systemctl enable sddm
-elif [ "$de_options" = 5 ]; then
-    # Install Deepin
-    colorecho "$GREEN" "Installing Deepin ..."
-    sudo pacman -S deepin deepin-extra --noconfirm
-    echo -e "greeter-session=lightdm-deepin-greeter" | sudo tee /etc/lightdm/lightdm.conf
-elif [ "$de_options" = 6 ]; then
-    # Install XFCE
-    colorecho "$GREEN" "Installing XFCE ..."
-    sudo pacman -S xfce4 xfce4-goodies gdm --noconfirm
-    sudo systemctl enable gdm
-elif [ "$de_options" = 7 ]; then
-    # Install LXQT
-    colorecho "$GREEN" "Installing LXQT ..."
-    sudo pacman -S lxqt sddm --noconfirm
-    sudo systemctl enable sddm
-elif [ "$de_options" = 8 ]; then
-    # Install LXDE
-    colorecho "$GREEN" "Installing LXDE ..."
-    sudo pacman -S lxde lxdm-gtk3 --noconfirm
-    sudo systemctl enable lxdm
-elif [ "$de_options" = 9 ]; then
-    # Install MATE
-    colorecho "$GREEN" "Installing MATE ..."
-    sudo pacman -S mate mate-extra gdm --noconfirm
-    sudo systemctl enable gdm
-elif [ "$de_options" = 10 ]; then
-    # Install Cinnamon
-    colorecho "$GREEN" "Installing Cinnamon ..."
-    sudo pacman -S cinnamon cinnamon-translations nemo-fileroller nemo-image-converter nemo-preview xed xreader gnome-terminal metacity gnome-shell gdm --noconfirm
-    sudo systemctl enable gdm
-else
-    colorecho "$YELLOW" "Skipping install desktop environment ..."
-fi
-
-################################################################
-# Install additional packages
-
-colorecho "$GREEN" "Starting additional packages installer ..."
-arch-rock-config install --installer
-
-################################################################
-# Installation clean up
-
-title "Arch Rock Installer - Installation Finished"
-
-# Detect the current username
-current_username=$(whoami)
-
-# Check if "installer" exists in .bashrc
-if sudo grep -q "installer" /home/$current_username/.bashrc; then
-    # Remove "installer" from .bashrc
-    sudo sed -i '/installer/d' /home/$current_username/.bashrc
-    sudo rm -rf /etc/systemd/system/getty@tty1.service.d/autologin.conf
-fi
-
-# Prompt user to reboot
-read -t 5 -p "Changes have been made. We will reboot your system in 5 seconds. Do you want to reboot now? (y/n): " reboot_choice
-
-if [[ "$reboot_choice" == "n" || "$reboot_choice" == "N" ]]; then
-    echo "You may manually reboot later to apply the changes."
-    echo "To remove this installer, run sudo rm -rf /usr/bin/installer"
-else
-    colorecho "$GREEN" "Cleaning up installations ..."
-    sudo rm -rf /usr/bin/installer
-    colorecho "$GREEN" "Rebooting system ..."
-    sudo reboot
-fi
 
 ################################################################
